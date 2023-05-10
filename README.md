@@ -1,4 +1,4 @@
-# Face detector Attendance App uing google ml-kit
+# Face detector Attendance App using google ml-kit
 
 A new Flutter project.
 
