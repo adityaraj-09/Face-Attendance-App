@@ -1,6 +1,8 @@
-# face_attendance
+# Face detector Attendance App using google ml-kit
 
-A new Flutter project.
+This app is using Firebase as backend
+
+
 
 ## Getting Started
 
