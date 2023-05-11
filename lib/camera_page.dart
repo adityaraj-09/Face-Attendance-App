@@ -1,7 +1,10 @@
+
+
 import 'package:camera/camera.dart';
 import 'package:face_attendance/home_page.dart';
 import 'package:face_attendance/user.dart';
 import 'package:face_attendance/widgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
@@ -23,7 +26,9 @@ class _FaceScanScreenState extends State<FaceScanScreen> {
 
   late CameraController _cameraController;
   bool flash = false;
+  bool visible=false;
   bool isControllerInitialized = false;
+  int value=0;
   late FaceDetector _faceDetector;
   final MLService _mlService = MLService();
   List<Face> facesDetected = [];
@@ -91,8 +96,7 @@ class _FaceScanScreenState extends State<FaceScanScreen> {
           showSnakbar(context, Colors.blueGrey, "Face not matched");//
           Navigator.pop(context);
         } else {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const HomePage()));
+          nextScreenReplace(context, const HomePage());
         }
       }
     }
@@ -108,8 +112,17 @@ class _FaceScanScreenState extends State<FaceScanScreen> {
       _cameraController.setFlashMode(FlashMode.off);
     } else {
       showSnakbar(context, Colors.red, "No face detected..try again");
+      Navigator.pop(context);
     }
   }
+  final Map<int,Widget> map=  <int,Widget>{
+    0:Container(
+      width: 78,
+      child: const Center(child: Text("1:1"),),),
+    1:const Text("4:9"),
+    2:const Text("16:9"),
+    3:const Text("Full")
+  };
 
 
 
@@ -149,72 +162,114 @@ class _FaceScanScreenState extends State<FaceScanScreen> {
         body: Stack(
           children: [
             SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height ,
+                width:double.infinity,
+                height: double.infinity,
                 child: isControllerInitialized
                     ? CameraPreview(_cameraController)
                     : null),
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 100),
-                      child: Lottie.asset("assets/loading.json",
-                          width: MediaQuery.of(context).size.width * 0.7),
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                        child: GestureDetector(
-                          onTap: (){
-                            bool canProcess = false;
-                            _cameraController.startImageStream((CameraImage image) async {
-                              if (canProcess) return;
-                              canProcess = true;
-                              _predictFacesFromImage(image: image).then((value) {
-                                canProcess = false;
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 40,horizontal: 10
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    visible?Row(
+                      children: [
+                        CupertinoSegmentedControl<int>(children: map,
+                            groupValue: value,
+                            onValueChanged: (int val){
+                              setState(() {
+                                value=val;
                               });
-                              return null;
+                            }),
+                        InkWell(
+                          onTap: (){
+                            setState(() {
+                              visible=!visible;
                             });
                           },
-                          child: Container(
-
-                            decoration: const BoxDecoration(
-                                color: Color(0xff2E4237),
-                              borderRadius: BorderRadius.all(Radius.circular(10))
-                            ),
-                            height: 40,
-                            width: 200,
-                            child: Center(child: Text("Mark Attendance",style: GoogleFonts.poppins(color: Colors.white,fontSize: 20),)),
-                              ),
-                        ),
-                      ),
-                      IconButton(
-                          icon: Icon(
-                            flash ? Icons.flash_on : Icons.flash_off,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                          onPressed: () {
+                            child: Icon(Icons.cancel,color: Colors.white,size: 28,))
+                      ],
+                    ):Row(
+                      children: [
+                         Expanded(child: Container()),
+                        InkWell(
+                          onTap: (){
                             setState(() {
-                              flash = !flash;
+                              visible=!visible;
                             });
-                            flash
-                                ? _cameraController
-                                    .setFlashMode(FlashMode.torch)
-                                : _cameraController.setFlashMode(FlashMode.off);
-                          }),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                ],
+                          },
+                          child: Icon(
+                            Icons.menu,color: Colors.white,size: 28,),
+                        )
+                      ],
+                    ),
+
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 100),
+                        child: Lottie.asset("assets/loading.json",
+                            width: MediaQuery.of(context).size.width * 0.7),
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        IconButton(
+                            icon: const Icon(
+                               Icons.analytics_outlined ,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                            onPressed: () {
+                            }),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                          child: GestureDetector(
+                            onTap: (){
+                              bool canProcess = false;
+                              _cameraController.startImageStream((CameraImage image) async {
+                                if (canProcess) return;
+                                canProcess = true;
+                                _predictFacesFromImage(image: image).then((value) {
+                                  canProcess = false;
+                                });
+                                return null;
+                              });
+                            },
+                            child:  CircleAvatar(
+                              radius: 35,
+                              backgroundColor: Colors.blueGrey,
+                              child: ClipOval(
+                                child: Container(height: 52,width: 52,color: Colors.white,),
+                              ),
+
+                            )
+                          ),
+                        ),
+                        IconButton(
+                            icon: Icon(
+                              flash ? Icons.flash_on : Icons.flash_off,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                flash = !flash;
+                              });
+                              flash
+                                  ? _cameraController
+                                      .setFlashMode(FlashMode.torch)
+                                  : _cameraController.setFlashMode(FlashMode.off);
+                            }),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

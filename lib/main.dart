@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'helper_function.dart';
@@ -31,11 +32,14 @@ void main() async{
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
 
-  // This widget is the root of your application.
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
@@ -43,7 +47,7 @@ class MyApp extends StatelessWidget {
             statusBarColor: Colors.transparent
         )
     );
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Timble2.o',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -53,4 +57,5 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
 

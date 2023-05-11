@@ -38,10 +38,11 @@ class MLService {
     print(predictedArray.toString());
     
      if(attendance){
-       List? userArray =await Database().getImg();
+       List? userArray =await Database(uid: FirebaseAuth.instance.currentUser!.uid).getImg();
        int minDist = 999;
        double threshold = 1.5;
        var dist = euclideanDistance(predictedArray!, userArray!);
+       print(dist);
        if (dist <= threshold && dist < minDist) {
          return true ;
        } else {

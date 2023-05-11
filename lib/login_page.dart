@@ -152,7 +152,11 @@ class _LoginPageState extends State<LoginPage> {
                           });
                         },
                         validator: (val){
-
+                          if(val!.isEmpty){
+                            return "enter entry no";
+                          }else{
+                            return null;
+                          }
                         },
                       ),
                       const SizedBox(height: 15,),
@@ -222,7 +226,7 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children:<Widget> [
-                      const SizedBox(height: 70,),
+                      const SizedBox(height: 69,),
                       TextFormField(
                         decoration: textInputdec.copyWith(
                             labelText: "Name",
@@ -244,7 +248,7 @@ class _LoginPageState extends State<LoginPage> {
                           }
                         },
                       ),
-                      const SizedBox(height: 15,),
+                      const SizedBox(height: 13,),
                       TextFormField(
                         decoration: textInputdec.copyWith(
                             labelText: "Entry Number",
@@ -262,7 +266,7 @@ class _LoginPageState extends State<LoginPage> {
 
                         },
                       ),
-                      const SizedBox(height: 15,),
+                      const SizedBox(height: 13,),
                       TextFormField(
                         obscureText: obscure,
                         decoration: textInputdec.copyWith(
@@ -336,11 +340,12 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
   register() async{
-    String email=entryNo.substring(4,7).toLowerCase()+"22"+entryNo.substring(7,11)+"@iitd.ac.in";
+
     if(registerKey.currentState!.validate()){
       setState(() {
         isloading=true;
       });
+      String email=entryNo.substring(4,7).toLowerCase()+"22"+entryNo.substring(7,11)+"@iitd.ac.in";
       await authservice.registeruser(name, email, password,entryNo).then((value) async{
         if(value==true){
           await Helper.saveUserStatus(true);
@@ -359,11 +364,12 @@ class _LoginPageState extends State<LoginPage> {
 
   }
   login() async{
-    String email="${entryNo.substring(4,7).toLowerCase()}22${entryNo.substring(7,11)}@iitd.ac.in";
+
     if(loginKey.currentState!.validate()){
       setState(() {
         isloading=true;
       });
+      String email="${entryNo.substring(4,7).toLowerCase()}22${entryNo.substring(7,11)}@iitd.ac.in";
       await authservice.login(email, password).then((value) async{
         if(value==true){
           QuerySnapshot snapshot= await Database(uid: FirebaseAuth.instance.currentUser!.uid)

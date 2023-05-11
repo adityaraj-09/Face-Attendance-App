@@ -35,9 +35,9 @@ class Database{
     return snapshot;
   }
   getImg()async{
-    DocumentReference d=FirebaseFirestore.instance.collection("test").doc("T");
+    DocumentReference d=usercollection.doc(uid);
     DocumentSnapshot documentSnapshot=await d.get();
-    return documentSnapshot['list'];
+    return documentSnapshot['faceId'];
   }
 
    gettingUserfromid(String id) async{
