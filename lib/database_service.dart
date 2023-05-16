@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 
 class Database{
   final String? uid;
@@ -27,6 +28,10 @@ class Database{
       "uid":uid,
       "attendance":0,
     });
+  }
+
+  getCourses(){
+    return usercollection.doc(uid).collection('Attendance').orderBy("id").snapshots();
   }
 
 
@@ -58,7 +63,7 @@ class Database{
 
   uploadImage(File? file) async {
     FirebaseStorage _storage = FirebaseStorage.instance;
-    final storgeRef=FirebaseStorage.instance.ref().child(DateTime.now().microsecondsSinceEpoch.toString());
+    final storgeRef=_storage.ref().child(DateTime.now().microsecondsSinceEpoch.toString());
     UploadTask uploadTask = storgeRef.putFile(file!);
     final snapshot=await uploadTask.whenComplete((){});
     final urlDownload=await snapshot.ref.getDownloadURL();
@@ -71,6 +76,15 @@ class Database{
     }
     );
   }
+  updateAttendance(int attendance,String? id){
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat.yMMMMd().format(now);
+    usercollection.doc(uid).collection('Attendance').doc(id).update({
+      "attnd":attendance,
+      "Lastmarked":DateTime.now().microsecondsSinceEpoch.toInt()
+    });
+  }
+
 
 
 }

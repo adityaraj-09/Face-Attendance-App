@@ -53,7 +53,7 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home:  FirebaseAuth.instance.currentUser!=null? HomePage():LoginPage(cameras: cameras,),
+      home:  FirebaseAuth.instance.currentUser!=null? HomePage(cameras: cameras,):LoginPage(cameras: cameras,),
     );
   }
 }

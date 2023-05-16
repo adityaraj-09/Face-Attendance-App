@@ -1,9 +1,11 @@
 
 
 import 'package:camera/camera.dart';
+import 'package:face_attendance/database_service.dart';
 import 'package:face_attendance/home_page.dart';
 import 'package:face_attendance/user.dart';
 import 'package:face_attendance/widgets.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,7 +17,11 @@ import 'ml_service.dart';
 class FaceScanScreen extends StatefulWidget {
   bool register;
   List<CameraDescription> cameras;
-   FaceScanScreen({Key? key, required this.register,required this.cameras}) : super(key: key);
+  bool login;
+  int attendance;
+  String? id;
+  int? lastMarked;
+   FaceScanScreen({Key? key, required this.register,required this.cameras,required this.login,required this.attendance,this.id,this.lastMarked}) : super(key: key);
 
   @override
   _FaceScanScreenState createState() => _FaceScanScreenState();
@@ -32,6 +38,7 @@ class _FaceScanScreenState extends State<FaceScanScreen> {
   late FaceDetector _faceDetector;
   final MLService _mlService = MLService();
   List<Face> facesDetected = [];
+  
 
   Future initializeCamera() async {
     await _cameraController.initialize();
@@ -90,13 +97,32 @@ class _FaceScanScreenState extends State<FaceScanScreen> {
       if (widget.register) {
         showSnakbar(context, Colors.blueGrey, "Face registered");// register case
         Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
-            builder: (context) => const HomePage()), (Route route) => false);
+            builder: (context) =>  HomePage(cameras: widget.cameras,)), (Route route) => false);
       } else {
         if (user == false) {
           showSnakbar(context, Colors.blueGrey, "Face not matched");//
           Navigator.pop(context);
+          if(!widget.login){
+            showSnakbar(context, Colors.blueGrey, "Attendance not marked");//
+            Navigator.pop(context);
+          }
         } else {
-          nextScreenReplace(context, const HomePage());
+          if(widget.login){
+            showSnakbar(context, Colors.blueGrey, "Face matched");
+            nextScreenReplace(context,  HomePage(cameras: widget.cameras,));
+          }else{
+            if(widget.lastMarked!-DateTime.now().microsecondsSinceEpoch.toInt()>1800000 && widget.lastMarked!-DateTime.now().microsecondsSinceEpoch.toInt()<3600000){
+              Database(uid: FirebaseAuth.instance.currentUser!.uid).updateAttendance(widget.attendance+1, widget.id);
+              showSnakbar(context, Colors.blueGrey, "Attendace marked");
+            }else if(widget.lastMarked!-DateTime.now().microsecondsSinceEpoch.toInt()>43200000){
+              Database(uid: FirebaseAuth.instance.currentUser!.uid).updateAttendance(widget.attendance+1, widget.id);
+              showSnakbar(context, Colors.blueGrey, "Attendace marked");
+            }else{
+              showSnakbar(context, Colors.red, "Cannot mark attendance now ");
+            }
+            nextScreenReplace(context,  HomePage(cameras: widget.cameras,));
+          }
+
         }
       }
     }
@@ -149,6 +175,7 @@ class _FaceScanScreenState extends State<FaceScanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final deviceRatio=MediaQuery.of( context).size.width/MediaQuery.of(context).size.height;
     return GestureDetector(
       onTap: () {
         FocusScopeNode currentFocus = FocusScope.of(context);
@@ -165,7 +192,11 @@ class _FaceScanScreenState extends State<FaceScanScreen> {
                 width:double.infinity,
                 height: double.infinity,
                 child: isControllerInitialized
-                    ? CameraPreview(_cameraController)
+                    ? ClipRect(
+                      child: AspectRatio(
+                  aspectRatio: 16/9,
+                      child: CameraPreview(_cameraController)),
+                    )
                     : null),
             Container(
               padding: const EdgeInsets.symmetric(vertical: 40,horizontal: 10

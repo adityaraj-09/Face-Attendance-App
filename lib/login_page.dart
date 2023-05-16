@@ -320,8 +320,6 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
 
-
-
                     ],
                   ),
                 ),
@@ -345,14 +343,14 @@ class _LoginPageState extends State<LoginPage> {
       setState(() {
         isloading=true;
       });
-      String email=entryNo.substring(4,7).toLowerCase()+"22"+entryNo.substring(7,11)+"@iitd.ac.in";
+      String email="${entryNo.substring(4,7).toLowerCase()}22${entryNo.substring(7,11)}@iitd.ac.in";
       await authservice.registeruser(name, email, password,entryNo).then((value) async{
         if(value==true){
           await Helper.saveUserStatus(true);
           await Helper.saveUserEmail(email);
           await Helper.saveUserName(name);
           await Helper.saveUserProfile("");
-          nextScreenReplace(context,  FaceScanScreen(register: true,cameras: widget.cameras,));
+          nextScreenReplace(context,  FaceScanScreen(register: false,cameras: widget.cameras,login: false,attendance: 0,));
         }else{
           showSnakbar(context, Colors.red, value);
           setState(() {
@@ -363,6 +361,8 @@ class _LoginPageState extends State<LoginPage> {
     }
 
   }
+
+
   login() async{
 
     if(loginKey.currentState!.validate()){
@@ -378,7 +378,7 @@ class _LoginPageState extends State<LoginPage> {
            Helper.saveUserEmail(email);
           await Helper.saveUserName(snapshot.docs[0]['Name']);
           await Helper.saveUserProfile(snapshot.docs[0]['profilePic']);
-          nextScreen(context, FaceScanScreen(register: true,cameras: widget.cameras,));
+          nextScreen(context, FaceScanScreen(register: false,cameras: widget.cameras,login: true,attendance: 0,));
         }else{
           showSnakbar(context, Colors.red, value);
           setState(() {
